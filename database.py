@@ -1,9 +1,14 @@
+from sqlalchemy.orm import Session
 from sqlalchemy import ForeignKey, create_engine, Column, Integer, String, Enum, DateTime
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
 from datetime import datetime
 import enum
+from cachetools import TTLCache, cached
 
+
+# Создаем кэш с временем жизни 300 секунд и размером 100
+cache = TTLCache(maxsize=100, ttl=300)
 
 DATABASE_URL = "sqlite:///./fa_crud.db"
 
@@ -64,3 +69,12 @@ class Task(Base):
 
 def init_db():
     Base.metadata.create_all(bind=engine)
+
+
+@cached(cache)
+def get_user_by_id(db: Session, user_id: int):
+    return db.query(User).filter(User.id == user_id).first()
+
+@cached(cache)
+def get_tasks_by_user_id(db: Session, user_id: int):
+    return db.query(Task).filter(Task.owner_id == user_id).all()
