@@ -57,7 +57,7 @@ class Task(Base):
     status = Column(Enum(TaskStatus))
     priority = Column(Enum(TaskPriority))  # Добавлено поле приоритета
     created_at = Column(DateTime, default=datetime.utcnow)
-    owner_id = Column(Integer, ForeignKey('users.id'))  # Здесь определяем внешний ключ
+    owner_name = Column(Integer, ForeignKey('users.username'))  # Здесь определяем внешний ключ
 
     owner = relationship("User", back_populates="tasks")
 

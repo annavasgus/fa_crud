@@ -26,3 +26,14 @@
 
 
 uvicorn server:app --reload
+
+
+
+
+- jwt
+```
+{
+  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1MSIsImV4cCI6MTc0MjY3ODk1NH0.KqjbeZMs0tENdTeqazvEgr7qySyjgKOEHGdM3cWCmGQ",
+  "token_type": "bearer"
+}
+```

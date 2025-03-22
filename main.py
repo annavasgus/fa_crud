@@ -91,10 +91,12 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
     )
 
     try:
+        # print(token)
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         username: str = payload.get("sub")
         if username is None:
             raise credentials_exception
+        # print(username)
         return username  # Вернем имя пользователя для дальнейшего использования
     except JWTError:
         raise credentials_exception
@@ -130,7 +132,7 @@ def create_task(
     current_user: str = Depends(get_current_user)
 ):
     """Создание задачи"""
-    db_task = database.Task(**task.dict(), owner_id=current_user.id)  # Устанавливаем владельца задачи)
+    db_task = database.Task(**task.dict(), owner_name=current_user)  # Устанавливаем владельца задачи)
     db.add(db_task)
     db.commit()
     db.refresh(db_task)
@@ -145,7 +147,7 @@ def read_tasks(
 ):
     """Получение списка задач с возможностью сортировки"""
     query = db.query(database.Task).filter(
-        database.Task.owner_id == current_user.id
+        database.Task.owner_name == current_user
         ).all()
 
     if sort_by == "title":
@@ -155,7 +157,7 @@ def read_tasks(
     elif sort_by == "created_at":
         query = query.order_by(database.Task.created_at)
 
-    return query.all()
+    return query  #.all()
 
 
 @app.get("/tasks/top/{n}")  #, response_model=List[Task])
@@ -166,7 +168,7 @@ def read_top_tasks(
 ):
     """Получение списка топ n задач по приоритетам (высокий приоритет первым)"""
     return db.query(database.Task).filter(
-        database.Task.owner_id == current_user.id
+        database.Task.owner_name == current_user
         ).order_by(
         database.Task.priority.desc()
         ).limit(n).all()
@@ -181,7 +183,7 @@ def read_task(
     """Получение задачи по id"""
     task = db.query(database.Task).filter(
         database.Task.id == task_id,
-        database.Task.owner_id == current_user.id
+        database.Task.owner_name == current_user
         ).first()
     if task is None:
         raise HTTPException(status_code=404, detail="Task not found")
@@ -198,7 +200,7 @@ def update_task(
     """Обновление данных задачи по id"""
     task = db.query(database.Task).filter(
         database.Task.id == task_id,
-        database.Task.owner_id == current_user.id
+        database.Task.owner_name == current_user
         ).first()
 
     if task is None:
